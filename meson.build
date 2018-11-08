@@ -1,4 +1,4 @@
-project('WTPG', 'cpp')
+project('WT anonymous chat', 'cpp')
 WT_ROOT = get_option('wtroot')
 c = meson.get_compiler('cpp')
 src = meson.source_root()
@@ -18,7 +18,7 @@ src = [
   'src/main.cpp',
 ]
 
-executable('wtpg', src, 
+executable('wtchat', src, 
 	build_rpath : '$ORIGIN/lib',
 	dependencies : deps
 )
