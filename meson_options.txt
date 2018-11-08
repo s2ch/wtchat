@@ -1,0 +1,1 @@
+option('wtroot', type : 'string', value : '/usr', description : 'WT root directory')

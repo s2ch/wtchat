@@ -1,0 +1,24 @@
+project('WTPG', 'cpp')
+WT_ROOT = get_option('wtroot')
+c = meson.get_compiler('cpp')
+src = meson.source_root()
+dirs = [src + '/lib/x86', WT_ROOT + '/lib', WT_ROOT + '/lib/x86_64-linux-gnu', WT_ROOT + '/lib/i386-linux-gnu']
+incs = include_directories(WT_ROOT + '/include')
+
+wtlibs = ['wt', 'wthttp']
+wtdeps = []
+
+foreach l : wtlibs
+  wtdeps += c.find_library(l, dirs : dirs)
+endforeach
+
+wt = declare_dependency(dependencies : wtdeps, include_directories : incs)
+deps = [wt]
+src = [
+  'src/main.cpp',
+]
+
+executable('wtpg', src, 
+	build_rpath : '$ORIGIN/lib',
+	dependencies : deps
+)
