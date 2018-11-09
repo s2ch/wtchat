@@ -16,6 +16,8 @@ wt = declare_dependency(dependencies : wtdeps, include_directories : incs)
 deps = [wt]
 src = [
   'src/main.cpp',
+  'src/ChatApp.cpp',
+  'src/State.cpp'
 ]
 
 executable('wtchat', src, 
