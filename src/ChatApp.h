@@ -20,8 +20,10 @@ private:
     Wt::WTextArea* m_ta_chat;
     State& m_state;
     Wt::WString m_name;
+    std::list<uint64_t> m_timestamps;
     friend void addText(ChatApp* target, const Wt::WEnvironment& env, const Wt::WString& text);
     Wt::WString getName();
+    unsigned int ratelimit();
 public:
     ChatApp(const Wt::WEnvironment& env, Wt::WServer& srv, State& state);
     ~ChatApp();

@@ -12,6 +12,15 @@ foreach l : wtlibs
   wtdeps += c.find_library(l, dirs : dirs)
 endforeach
 
+conf_data = configuration_data()
+conf_data.set('MAX_MSG_COUNT', get_option('msgcount'))
+conf_data.set('MAX_MSG_PERIOD', get_option('msgperiod'))
+conf_data.set('MAX_MSG_LENGTH', get_option('msglen'))
+conf_data.set('MAX_NAME_LENGTH', get_option('namelen'))
+configure_file(input : 'src/config.h.in',
+               output : 'config.h',
+               configuration : conf_data)
+
 wt = declare_dependency(dependencies : wtdeps, include_directories : incs)
 deps = [wt]
 src = [

@@ -18,6 +18,7 @@
 #include <Wt/WEnvironment.h>
 #include <boost/algorithm/string.hpp>
 #include <limits.h>
+#include "config.h"
 
 using namespace Wt;
 using namespace std;
@@ -28,7 +29,7 @@ void doJs(WWidget* widget, const string& jsText) {
 
 void addText(ChatApp* target, const WEnvironment& env, const WString& text) {
     auto e = target->m_ta_chat->jsRef();
-    doJs(target->m_ta_chat, "@.value += " + WWebWidget::jsStringLiteral(text) + " + '\\n'; @.scrollTop=@.scrollHeight");
+    doJs(target->m_ta_chat, "@.value += " + text.jsStringLiteral() + " + '\\n'; @.scrollTop=@.scrollHeight");
 }
 
 ChatApp::ChatApp(const WEnvironment& env, WServer& srv, State& state) :
@@ -51,9 +52,11 @@ ChatApp::ChatApp(const WEnvironment& env, WServer& srv, State& state) :
 
     auto msg_cont = layout->addWidget(make_unique<WContainerWidget>())->setLayout(make_unique<Wt::WHBoxLayout>());
     auto tb_msg = msg_cont->addWidget(make_unique<WLineEdit>());
+    tb_msg->setMaxLength(MAX_MSG_LENGTH);
     auto tb_name = msg_cont->addWidget(make_unique<WLineEdit>());
     tb_name->setPlaceholderText("Аноним");
     tb_name->setWidth("10%");
+    tb_name->setMaxLength(MAX_NAME_LENGTH);
     auto ni = env.cookies().find("name");
     if (ni != env.cookies().end()) {
         m_name = ni->second;
@@ -76,18 +79,36 @@ ChatApp::ChatApp(const WEnvironment& env, WServer& srv, State& state) :
     tb_msg->enterPressed().connect([=] {
         b_send->clicked().emit(Wt::WMouseEvent());
     });
-    b_send->clicked().connect([&, this, tb_msg]() {
-        if (tb_msg->text().empty()) {
-            return;
-        }
-        auto text = "<" + getName() + "> " + tb_msg->text();
-        tb_msg->setText("");
-        addText(this, env, text);
-        state.broadcast(sessionId(), [&, text](ChatApp* target) {
-                    addText(target, env, text);
-                    target->triggerUpdate();
-                });
-    });
+    b_send->clicked().connect(
+            [&, this, tb_msg]() {
+                auto text = tb_msg->text();
+                if (text.empty()) {
+                    return;
+                }
+                auto text_len = text.value().length();
+                if (text_len > MAX_MSG_LENGTH) {
+                    addText(this, env, WString("[слишком длинное сообщение, {1} символов, максимум {2}]").arg(text_len).arg(MAX_MSG_LENGTH));
+                    return;
+                }
+                auto rl = ratelimit();
+                if (rl) {
+                    addText(this, env, WString("[для отправки сообщения нужно подождать {1} сек]").arg(rl));
+                    return;
+                }
+                auto name = getName();
+                auto name_len = name.value().length();
+                if (name_len > MAX_NAME_LENGTH) {
+                    addText(this, env, WString("[слишком длинное имя ({1} символов), максимум {2}]").arg(name_len).arg(MAX_NAME_LENGTH));
+                    return;
+                }
+                auto msg = "<" + name + "> " + tb_msg->text();
+                tb_msg->setText("");
+                addText(this, env, msg);
+                state.broadcast(sessionId(), [&, msg](ChatApp* target) {
+                            addText(target, env, msg);
+                            target->triggerUpdate();
+                        });
+            });
 }
 
 WString ChatApp::getName() {
@@ -101,3 +122,15 @@ ChatApp::~ChatApp() {
     m_state.removeApp(sessionId());
 }
 
+unsigned int ChatApp::ratelimit() {
+    auto now = time(NULL);
+    if (m_timestamps.size() == MAX_MSG_COUNT) {
+        auto oldest = m_timestamps.front();
+        if (now - oldest < MAX_MSG_PERIOD) {
+            return MAX_MSG_PERIOD - (now - oldest);
+        }
+        m_timestamps.pop_front();
+    }
+    m_timestamps.push_back(now);
+    return 0;
+}
