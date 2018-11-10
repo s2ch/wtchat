@@ -34,6 +34,7 @@ void ChatApp::addText(ChatApp* target, const WString& text) {
 
 ChatApp::ChatApp(const WEnvironment& env, WServer& srv, State& state) :
         WApplication(env), m_state(state) {
+    m_state.addApp(sessionId(), this);
     enableUpdates(true);
     useStyleSheet(appRoot() + "css/style.css");
     auto theme = make_shared<WBootstrapTheme>();
@@ -53,28 +54,20 @@ ChatApp::ChatApp(const WEnvironment& env, WServer& srv, State& state) :
     auto msg_cont = layout->addWidget(make_unique<WContainerWidget>())->setLayout(make_unique<Wt::WHBoxLayout>());
     m_tb_msg = msg_cont->addWidget(make_unique<WLineEdit>());
     m_tb_msg->setMaxLength(MAX_MSG_LENGTH);
-    auto tb_name = msg_cont->addWidget(make_unique<WLineEdit>());
-    tb_name->setPlaceholderText("Аноним");
-    tb_name->setWidth("10%");
-    tb_name->setMaxLength(MAX_NAME_LENGTH);
+    m_tb_name = msg_cont->addWidget(make_unique<WLineEdit>());
+    m_tb_name->setPlaceholderText("Аноним");
+    m_tb_name->setWidth("10%");
+    m_tb_name->setMaxLength(MAX_NAME_LENGTH);
     auto ni = env.cookies().find("name");
     if (ni != env.cookies().end()) {
         m_name = ni->second;
-        tb_name->setText(m_name);
+        m_tb_name->setText(m_name);
     }
 
-    tb_name->blurred().connect([=] {
-        m_name = tb_name->text();
-        if (m_name.empty()) {
-            removeCookie("name");
-        } else {
-            setCookie("name", m_name.toUTF8(), INT_MAX);
-        }
-    });
+    m_tb_name->blurred().connect(this, &ChatApp::updateName);
 
     auto b_send = layout->addWidget(std::make_unique<Wt::WPushButton>("Послать"));
     b_send->setWidth("100px");
-    state.addApp(sessionId(), this);
     m_tb_msg->setFocus();
     m_tb_msg->enterPressed().connect([=] {
         b_send->clicked().emit(Wt::WMouseEvent());
@@ -135,4 +128,13 @@ unsigned int ChatApp::ratelimit() {
     }
     m_timestamps.push_back(now);
     return 0;
+}
+
+void ChatApp::updateName() {
+    m_name = m_tb_name->text();
+    if (m_name.empty()) {
+        removeCookie("name");
+    } else {
+        setCookie("name", m_name.toUTF8(), INT_MAX);
+    }
 }
