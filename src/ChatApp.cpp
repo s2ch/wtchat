@@ -35,8 +35,8 @@ ChatApp::ChatApp(const WEnvironment& env, WServer& srv, State& state) :
         WApplication(env), m_state(state) {
     m_state.addApp(sessionId(), this);
     enableUpdates(true);
-    useStyleSheet(docRoot() + "/css/style.css");
-    messageResourceBundle().use(docRoot() + "/templates/messages");
+    useStyleSheet("/css/style.css");
+    messageResourceBundle().use("templates/messages");
     auto theme = make_shared<WBootstrapTheme>();
     theme->setVersion(BootstrapVersion::v3);
     setTheme(theme);
