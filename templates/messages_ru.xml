@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<messages nplurals="3"
+	plural="n==1 ? 0 : n%10&gt;=2 &amp;&amp; n%10&lt;=4 &amp;&amp; (n%100&lt;10 || n%100&gt;=20) ? 1 : 2">
+	<message id="title">Чяти</message>
+	<message id="anonymous">Аноним</message>
+	<message id="send">Послать</message>
+	<message id="msg_too_long">
+		<plural case="0">[сообщение слишком длинное, {1} символ, максимум {2}]</plural>
+		<plural case="1">[сообщение слишком длинное, {1} символа, максимум {2}]</plural>
+		<plural case="2">[сообщение слишком длинное, {1} символов, максимум {2}]</plural>
+	</message>
+	<message id="ratelimited">
+		<plural case="0">[для отправки сообщения нужно подождать {1} секунду]</plural>
+		<plural case="1">[для отправки сообщения нужно подождать {1} секунды]</plural>
+		<plural case="2">[для отправки сообщения нужно подождать {1} секунд]</plural>
+	</message>
+	<message id="name_too_long">
+		<plural case="0">[слишком длинное имя ({1} символ), максимум {2}]</plural>
+		<plural case="1">[слишком длинное имя ({1} символа), максимум {2}]</plural>
+		<plural case="2">[слишком длинное имя ({1} символов), максимум {2}]</plural>
+	</message>
+</messages>

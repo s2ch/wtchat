@@ -35,16 +35,18 @@ ChatApp::ChatApp(const WEnvironment& env, WServer& srv, State& state) :
         WApplication(env), m_state(state) {
     m_state.addApp(sessionId(), this);
     enableUpdates(true);
-    useStyleSheet(appRoot() + "css/style.css");
+    useStyleSheet(docRoot() + "/css/style.css");
+    messageResourceBundle().use(docRoot() + "/templates/messages");
     auto theme = make_shared<WBootstrapTheme>();
     theme->setVersion(BootstrapVersion::v3);
     setTheme(theme);
+    setTitle(WString::tr("title"));
     auto cont = root()->addNew<WContainerWidget>();
     root()->setStyleClass("container");
     cont->setHeight("100%");
     root()->setHeight("100%");
     auto layout = cont->setLayout(make_unique<Wt::WVBoxLayout>());
-    layout->addWidget(make_unique<WLabel>("Чяти"));
+    layout->addWidget(make_unique<WLabel>(WString::tr("title")));
     cont->setContentAlignment(AlignmentFlag::Center);
     m_ta_chat = layout->addWidget(make_unique<WTextArea>(), 1);
     m_ta_chat->setWidth("100%");
@@ -54,7 +56,7 @@ ChatApp::ChatApp(const WEnvironment& env, WServer& srv, State& state) :
     m_tb_msg = msg_cont->addWidget(make_unique<WLineEdit>());
     m_tb_msg->setMaxLength(MAX_MSG_LENGTH);
     m_tb_name = msg_cont->addWidget(make_unique<WLineEdit>());
-    m_tb_name->setPlaceholderText("Аноним");
+    m_tb_name->setPlaceholderText(WString::tr("anonymous"));
     m_tb_name->setWidth("10%");
     m_tb_name->setMaxLength(MAX_NAME_LENGTH);
     auto ni = env.cookies().find("name");
@@ -65,7 +67,7 @@ ChatApp::ChatApp(const WEnvironment& env, WServer& srv, State& state) :
 
     m_tb_name->blurred().connect(this, &ChatApp::updateName);
 
-    auto b_send = layout->addWidget(std::make_unique<Wt::WPushButton>("Послать"));
+    auto b_send = layout->addWidget(std::make_unique<Wt::WPushButton>(WString::tr("send")));
     b_send->setWidth("100px");
     m_tb_msg->setFocus();
     m_tb_msg->enterPressed().connect([=] {
@@ -88,19 +90,18 @@ void ChatApp::sendMessage() {
     }
     auto text_len = text.value().length();
     if (text_len > MAX_MSG_LENGTH) {
-        addText(this,
-                WString("[слишком длинное сообщение, {1} символов, максимум {2}]").arg(text_len).arg(MAX_MSG_LENGTH));
+        addText(this, WString::trn("msg_too_long", text_len).arg(text_len).arg(MAX_MSG_LENGTH));
         return;
     }
     auto rl = ratelimit();
     if (rl) {
-        addText(this, WString("[для отправки сообщения нужно подождать {1} сек]").arg(rl));
+        addText(this, WString::trn("ratelimited", rl).arg(rl));
         return;
     }
     auto name = getName();
     auto name_len = name.value().length();
     if (name_len > MAX_NAME_LENGTH) {
-        addText(this, WString("[слишком длинное имя ({1} символов), максимум {2}]").arg(name_len).arg(MAX_NAME_LENGTH));
+        addText(this, WString::tr("name_too_long").arg(name_len).arg(MAX_NAME_LENGTH));
         return;
     }
     auto msg = "<" + name + "> " + text;

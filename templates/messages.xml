@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<messages nplurals="2" plural="n != 1">
+	<message id="title">Chatty</message>
+	<message id="anonymous">Anon</message>
+	<message id="send">Send</message>
+	<message id="msg_too_long">
+		<plural case="0">[message is too long, {1} char, max {2}]</plural>
+		<plural case="1">[message is too long, {1} chars, max {2}]</plural>
+	</message>
+	<message id="ratelimited">
+		<plural case="0">[wait for {1} more second to send the message]</plural>
+		<plural case="1">[wait for {1} more seconds to send the message]</plural>
+	</message>
+	<message id="name_too_long">
+		<plural case="0">[name too long ({1} char), max {2}]</plural>
+		<plural case="1">[name too long ({1} chars), max {2}]</plural>
+	</message>
+</messages>
