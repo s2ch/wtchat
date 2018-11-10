@@ -16,20 +16,19 @@
 #include <Wt/WPushButton.h>
 #include <Wt/WServer.h>
 #include <Wt/WEnvironment.h>
-#include <boost/algorithm/string.hpp>
 #include <limits.h>
 #include "config.h"
 
 using namespace Wt;
 using namespace std;
 
-void doJs(WWidget* widget, const string& jsText) {
-    widget->doJavaScript(boost::replace_all_copy(jsText, "@", widget->jsRef()));
+void doJs(WWidget* widget, WString jsText) {
+    widget->doJavaScript(jsText.arg(widget->jsRef()).toUTF8());
 }
 
 void ChatApp::addText(ChatApp* target, const WString& text) {
     auto e = target->m_ta_chat->jsRef();
-    doJs(target->m_ta_chat, "@.value += " + text.jsStringLiteral() + " + '\\n'; @.scrollTop=@.scrollHeight");
+    doJs(target->m_ta_chat, "{1}.value += " + text.jsStringLiteral() + " + '\\n'; {1}.scrollTop={1}.scrollHeight");
 }
 
 ChatApp::ChatApp(const WEnvironment& env, WServer& srv, State& state) :
