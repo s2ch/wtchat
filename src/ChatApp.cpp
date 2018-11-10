@@ -27,7 +27,7 @@ void doJs(WWidget* widget, const string& jsText) {
     widget->doJavaScript(boost::replace_all_copy(jsText, "@", widget->jsRef()));
 }
 
-void addText(ChatApp* target, const WEnvironment& env, const WString& text) {
+void ChatApp::addText(ChatApp* target, const WString& text) {
     auto e = target->m_ta_chat->jsRef();
     doJs(target->m_ta_chat, "@.value += " + text.jsStringLiteral() + " + '\\n'; @.scrollTop=@.scrollHeight");
 }
@@ -51,8 +51,8 @@ ChatApp::ChatApp(const WEnvironment& env, WServer& srv, State& state) :
     m_ta_chat->setReadOnly(true);
 
     auto msg_cont = layout->addWidget(make_unique<WContainerWidget>())->setLayout(make_unique<Wt::WHBoxLayout>());
-    auto tb_msg = msg_cont->addWidget(make_unique<WLineEdit>());
-    tb_msg->setMaxLength(MAX_MSG_LENGTH);
+    m_tb_msg = msg_cont->addWidget(make_unique<WLineEdit>());
+    m_tb_msg->setMaxLength(MAX_MSG_LENGTH);
     auto tb_name = msg_cont->addWidget(make_unique<WLineEdit>());
     tb_name->setPlaceholderText("Аноним");
     tb_name->setWidth("10%");
@@ -75,40 +75,11 @@ ChatApp::ChatApp(const WEnvironment& env, WServer& srv, State& state) :
     auto b_send = layout->addWidget(std::make_unique<Wt::WPushButton>("Послать"));
     b_send->setWidth("100px");
     state.addApp(sessionId(), this);
-    tb_msg->setFocus();
-    tb_msg->enterPressed().connect([=] {
+    m_tb_msg->setFocus();
+    m_tb_msg->enterPressed().connect([=] {
         b_send->clicked().emit(Wt::WMouseEvent());
     });
-    b_send->clicked().connect(
-            [&, this, tb_msg]() {
-                auto text = tb_msg->text();
-                if (text.empty()) {
-                    return;
-                }
-                auto text_len = text.value().length();
-                if (text_len > MAX_MSG_LENGTH) {
-                    addText(this, env, WString("[слишком длинное сообщение, {1} символов, максимум {2}]").arg(text_len).arg(MAX_MSG_LENGTH));
-                    return;
-                }
-                auto rl = ratelimit();
-                if (rl) {
-                    addText(this, env, WString("[для отправки сообщения нужно подождать {1} сек]").arg(rl));
-                    return;
-                }
-                auto name = getName();
-                auto name_len = name.value().length();
-                if (name_len > MAX_NAME_LENGTH) {
-                    addText(this, env, WString("[слишком длинное имя ({1} символов), максимум {2}]").arg(name_len).arg(MAX_NAME_LENGTH));
-                    return;
-                }
-                auto msg = "<" + name + "> " + tb_msg->text();
-                tb_msg->setText("");
-                addText(this, env, msg);
-                state.broadcast(sessionId(), [&, msg](ChatApp* target) {
-                            addText(target, env, msg);
-                            target->triggerUpdate();
-                        });
-            });
+    b_send->clicked().connect(this, &ChatApp::sendMessage);
 }
 
 WString ChatApp::getName() {
@@ -116,6 +87,37 @@ WString ChatApp::getName() {
         return m_state.getPostNumber();
     }
     return m_name;
+}
+
+void ChatApp::sendMessage() {
+    auto text = m_tb_msg->text();
+    if (text.empty()) {
+        return;
+    }
+    auto text_len = text.value().length();
+    if (text_len > MAX_MSG_LENGTH) {
+        addText(this,
+                WString("[слишком длинное сообщение, {1} символов, максимум {2}]").arg(text_len).arg(MAX_MSG_LENGTH));
+        return;
+    }
+    auto rl = ratelimit();
+    if (rl) {
+        addText(this, WString("[для отправки сообщения нужно подождать {1} сек]").arg(rl));
+        return;
+    }
+    auto name = getName();
+    auto name_len = name.value().length();
+    if (name_len > MAX_NAME_LENGTH) {
+        addText(this, WString("[слишком длинное имя ({1} символов), максимум {2}]").arg(name_len).arg(MAX_NAME_LENGTH));
+        return;
+    }
+    auto msg = "<" + name + "> " + text;
+    m_tb_msg->setText("");
+    addText(this, msg);
+    m_state.broadcast(sessionId(), [&, msg](ChatApp* target) {
+        addText(target, msg);
+        target->triggerUpdate();
+    });
 }
 
 ChatApp::~ChatApp() {
