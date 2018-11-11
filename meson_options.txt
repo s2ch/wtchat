@@ -3,3 +3,4 @@ option('msgcount', type : 'integer', value : 10, description : 'Maximum messages
 option('msgperiod', type : 'integer', value : 10, description : 'Rate limit period in seconds')
 option('msglen', type : 'integer', value : 512, description : 'Maximum message length in characters')
 option('namelen', type : 'integer', value : 20, description : 'Maximum name length in characters')
+option('lines', type : 'integer', value : 100, description : 'Maximum last chat lines stored')

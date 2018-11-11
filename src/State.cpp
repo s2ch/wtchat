@@ -6,6 +6,7 @@
  */
 
 #include "State.h"
+#include "config.h"
 #include <Wt/WServer.h>
 #include <boost/format.hpp>
 
@@ -50,7 +51,7 @@ Wt::WString State::addLine(Wt::WString name, const Wt::WString line) {
     auto result = Wt::WString("<span class='{1}'>&lt;{2}&gt;</span> {3}").arg(anon ? "num" : "name").arg(
             Wt::WWebWidget::escapeText(name, true)).arg(Wt::WWebWidget::escapeText(line));
     m_lines.push_back(result);
-    if (m_lines.size() > 10) {
+    if (m_lines.size() > MAX_LINES) {
         m_lines.pop_front();
     }
     return result;

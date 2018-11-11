@@ -2,3 +2,4 @@
 #mesondefine MAX_MSG_PERIOD
 #mesondefine MAX_MSG_LENGTH
 #mesondefine MAX_NAME_LENGTH
+#mesondefine MAX_LINES

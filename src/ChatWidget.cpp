@@ -6,6 +6,7 @@
  */
 
 #include "ChatWidget.h"
+#include "config.h"
 #include <Wt/WText.h>
 
 ChatWidget::ChatWidget() {
@@ -15,7 +16,7 @@ ChatWidget::ChatWidget() {
 void ChatWidget::addLine(const Wt::WString& line) {
     auto w_line = addWidget(std::make_unique<Wt::WText>(line));
     w_line->setInline(false);
-    if (count() > 10) {
+    if (count() > MAX_LINES) {
         removeWidget(widget(0));
     }
     doJs(this, "{1}.scrollTop={1}.scrollHeight");

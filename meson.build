@@ -17,6 +17,7 @@ conf_data.set('MAX_MSG_COUNT', get_option('msgcount'))
 conf_data.set('MAX_MSG_PERIOD', get_option('msgperiod'))
 conf_data.set('MAX_MSG_LENGTH', get_option('msglen'))
 conf_data.set('MAX_NAME_LENGTH', get_option('namelen'))
+conf_data.set('MAX_LINES', get_option('lines'))
 configure_file(input : 'src/config.h.in',
                output : 'config.h',
                configuration : conf_data)
