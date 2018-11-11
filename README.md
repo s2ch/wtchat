@@ -1,5 +1,5 @@
 # WTF
-Anonymous webchat written in C++/Wt. Currently requires JS but it might change in future. Current address:
+Anonymous webchat written in C++/Wt. Can work without JS support at all. Current address:
 http://s2chperdovidos2g.onion (tor2web addres is, for example, https://s2chperdovidos2g.onion.sh
 but better use a dedicated tor browser for true anonymity).
 
