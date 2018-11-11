@@ -28,6 +28,7 @@ ChatApp::ChatApp(const WEnvironment& env, WServer& srv, State& state) :
     m_state.addApp(sessionId(), this);
     enableUpdates(true);
     useStyleSheet("/css/style.css");
+    useStyleSheet("/resources/font-awesome/css/font-awesome.min.css");
     messageResourceBundle().use("templates/messages");
     auto theme = make_shared<WBootstrapTheme>();
     theme->setVersion(BootstrapVersion::v3);
@@ -47,6 +48,13 @@ ChatApp::ChatApp(const WEnvironment& env, WServer& srv, State& state) :
     auto msg_cont = layout->addWidget(make_unique<WContainerWidget>())->setLayout(make_unique<Wt::WHBoxLayout>());
     m_tb_msg = msg_cont->addWidget(make_unique<WLineEdit>());
     m_tb_msg->setMaxLength(MAX_MSG_LENGTH);
+    auto b_send = msg_cont->addWidget(std::make_unique<Wt::WPushButton>(WString::tr("send")));
+    b_send->setWidth("100px");
+    if (!env.javaScript()) {
+        auto b_refresh = msg_cont->addWidget(std::make_unique<Wt::WPushButton>(WString::tr("reload")));
+        b_refresh->setStyleClass("fa fa-refresh");
+        b_refresh->clicked().connect(this, &WApplication::refresh);
+    }
     m_tb_name = msg_cont->addWidget(make_unique<WLineEdit>());
     m_tb_name->setPlaceholderText(WString::tr("anonymous"));
     m_tb_name->setWidth("10%");
@@ -56,11 +64,7 @@ ChatApp::ChatApp(const WEnvironment& env, WServer& srv, State& state) :
         m_name = ni->second;
         m_tb_name->setText(m_name);
     }
-
     m_tb_name->blurred().connect(this, &ChatApp::updateName);
-
-    auto b_send = layout->addWidget(std::make_unique<Wt::WPushButton>(WString::tr("send")));
-    b_send->setWidth("100px");
     m_tb_msg->setFocus();
     m_tb_msg->enterPressed().connect([=] {
         b_send->clicked().emit(Wt::WMouseEvent());

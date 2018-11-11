@@ -19,4 +19,5 @@
 		<plural case="1">[слишком длинное имя ({1} символа), максимум {2}]</plural>
 		<plural case="2">[слишком длинное имя ({1} символов), максимум {2}]</plural>
 	</message>
+	<message id="reload"> Обновить</message>
 </messages>
