@@ -12,22 +12,22 @@
 #include <unordered_map>
 #include <mutex>
 #include "State.h"
+#include "ChatWidget.h"
 
 class State;
 
 class ChatApp: public Wt::WApplication {
 private:
-    Wt::WTextArea* m_ta_chat;
+    ChatWidget* m_ta_chat;
     Wt::WLineEdit* m_tb_msg;
     Wt::WLineEdit* m_tb_name;
     State& m_state;
     Wt::WString m_name;
     std::list<uint64_t> m_timestamps;
-    void addText(ChatApp* target, const Wt::WString& text);
-    Wt::WString getName();
     unsigned int ratelimit();
     void sendMessage();
     void updateName();
+    void loadLines();
 public:
     ChatApp(const Wt::WEnvironment& env, Wt::WServer& srv, State& state);
     ~ChatApp();

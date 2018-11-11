@@ -26,7 +26,9 @@ deps = [wt]
 src = [
   'src/main.cpp',
   'src/ChatApp.cpp',
-  'src/State.cpp'
+  'src/ChatWidget.cpp',
+  'src/State.cpp',
+  'src/utils.cpp'
 ]
 
 executable('wtchat', src, 

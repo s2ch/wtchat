@@ -18,18 +18,10 @@
 #include <Wt/WEnvironment.h>
 #include <limits.h>
 #include "config.h"
+#include "utils.h"
 
 using namespace Wt;
 using namespace std;
-
-void doJs(WWidget* widget, WString jsText) {
-    widget->doJavaScript(jsText.arg(widget->jsRef()).toUTF8());
-}
-
-void ChatApp::addText(ChatApp* target, const WString& text) {
-    auto e = target->m_ta_chat->jsRef();
-    doJs(target->m_ta_chat, "{1}.value += " + text.jsStringLiteral() + " + '\\n'; {1}.scrollTop={1}.scrollHeight");
-}
 
 ChatApp::ChatApp(const WEnvironment& env, WServer& srv, State& state) :
         WApplication(env), m_state(state) {
@@ -48,9 +40,9 @@ ChatApp::ChatApp(const WEnvironment& env, WServer& srv, State& state) :
     auto layout = cont->setLayout(make_unique<Wt::WVBoxLayout>());
     layout->addWidget(make_unique<WLabel>(WString::tr("title")));
     cont->setContentAlignment(AlignmentFlag::Center);
-    m_ta_chat = layout->addWidget(make_unique<WTextArea>(), 1);
+    m_ta_chat = layout->addWidget(make_unique<ChatWidget>(), 1);
     m_ta_chat->setWidth("100%");
-    m_ta_chat->setReadOnly(true);
+    loadLines();
 
     auto msg_cont = layout->addWidget(make_unique<WContainerWidget>())->setLayout(make_unique<Wt::WHBoxLayout>());
     m_tb_msg = msg_cont->addWidget(make_unique<WLineEdit>());
@@ -76,13 +68,6 @@ ChatApp::ChatApp(const WEnvironment& env, WServer& srv, State& state) :
     b_send->clicked().connect(this, &ChatApp::sendMessage);
 }
 
-WString ChatApp::getName() {
-    if (m_name.empty()) {
-        return m_state.getPostNumber();
-    }
-    return m_name;
-}
-
 void ChatApp::sendMessage() {
     auto text = m_tb_msg->text();
     if (text.empty()) {
@@ -90,25 +75,26 @@ void ChatApp::sendMessage() {
     }
     auto text_len = text.value().length();
     if (text_len > MAX_MSG_LENGTH) {
-        addText(this, WString::trn("msg_too_long", text_len).arg(text_len).arg(MAX_MSG_LENGTH));
+        m_ta_chat->addLine(WString::trn("msg_too_long", text_len).arg(text_len).arg(MAX_MSG_LENGTH));
         return;
     }
     auto rl = ratelimit();
     if (rl) {
-        addText(this, WString::trn("ratelimited", rl).arg(rl));
+        m_ta_chat->addLine(WString::trn("ratelimited", rl).arg(rl));
         return;
     }
-    auto name = getName();
-    auto name_len = name.value().length();
-    if (name_len > MAX_NAME_LENGTH) {
-        addText(this, WString::tr("name_too_long").arg(name_len).arg(MAX_NAME_LENGTH));
-        return;
+    if (!m_name.empty()) {
+        auto name_len = m_name.value().length();
+        if (name_len > MAX_NAME_LENGTH) {
+            m_ta_chat->addLine(WString::tr("name_too_long").arg(name_len).arg(MAX_NAME_LENGTH));
+            return;
+        }
     }
-    auto msg = "<" + name + "> " + text;
     m_tb_msg->setText("");
-    addText(this, msg);
+    auto msg = m_state.addLine(m_name, text);
+    m_ta_chat->addLine(msg);
     m_state.broadcast(sessionId(), [&, msg](ChatApp* target) {
-        addText(target, msg);
+        target->m_ta_chat->addLine(msg);
         target->triggerUpdate();
     });
 }
@@ -136,5 +122,11 @@ void ChatApp::updateName() {
         removeCookie("name");
     } else {
         setCookie("name", m_name.toUTF8(), INT_MAX);
+    }
+}
+
+void ChatApp::loadLines() {
+    for (auto& line : m_state.getLines()) {
+        m_ta_chat->addLine(line);
     }
 }

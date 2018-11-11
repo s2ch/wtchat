@@ -31,11 +31,31 @@ void State::broadcast(const std::string& skipId, std::function<void(ChatApp* app
 }
 
 std::string State::getPostNumber() {
-    std::lock_guard<std::mutex> lck(m_mutex);
+    std::lock_guard<std::recursive_mutex> lck(m_mutex);
     auto s = boost::format("%05d") % m_cnt++;
     return s.str();
 }
 
 State::State(Wt::WServer& srv) :
         m_srv(srv) {
+}
+
+Wt::WString State::addLine(Wt::WString name, const Wt::WString line) {
+    std::lock_guard<std::recursive_mutex> lck(m_mutex);
+    bool anon = false;
+    if (name.empty()) {
+        anon = true;
+        name = getPostNumber();
+    }
+    auto result = Wt::WString("<span class='{1}'>&lt;{2}&gt;</span> {3}").arg(anon ? "num" : "name").arg(
+            Wt::WWebWidget::escapeText(name, true)).arg(Wt::WWebWidget::escapeText(line));
+    m_lines.push_back(result);
+    if (m_lines.size() > 10) {
+        m_lines.pop_front();
+    }
+    return result;
+}
+
+std::list<Wt::WString> State::getLines() {
+    return m_lines;
 }
