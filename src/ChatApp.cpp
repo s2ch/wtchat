@@ -70,6 +70,9 @@ ChatApp::ChatApp(const WEnvironment& env, WServer& srv, State& state) :
 
 void ChatApp::sendMessage() {
     auto text = m_tb_msg->text();
+    if (!environment().javaScript()) {
+        updateName();
+    }
     if (text.empty()) {
         return;
     }
