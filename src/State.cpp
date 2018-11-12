@@ -11,14 +11,17 @@
 #include <boost/format.hpp>
 
 void State::addApp(const std::string& id, ChatApp* app) {
+    std::lock_guard<std::recursive_mutex> lck(m_mutex);
     m_apps.emplace(id, app);
 }
 
 void State::removeApp(const std::string& id) {
+    std::lock_guard<std::recursive_mutex> lck(m_mutex);
     m_apps.erase(id);
 }
 
 void State::broadcast(const std::string& skipId, std::function<void(ChatApp* app)> f) {
+    std::lock_guard<std::recursive_mutex> lck(m_mutex);
     for (auto& session : m_srv.sessions()) {
         auto id = session.sessionId;
         if (id != skipId) {
@@ -58,5 +61,6 @@ Wt::WString State::addLine(Wt::WString name, const Wt::WString line) {
 }
 
 std::list<Wt::WString> State::getLines() {
+    std::lock_guard<std::recursive_mutex> lck(m_mutex);
     return m_lines;
 }
