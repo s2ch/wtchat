@@ -13,7 +13,7 @@ int main(int argc, char **argv) {
         Wt::WServer server(argc, argv);
         State state(server);
         server.addEntryPoint(Wt::EntryPointType::Application, [&](const Wt::WEnvironment& env) {
-            return std::make_unique<ChatApp>(env, server, state);
+            return std::make_unique<ChatApp>(env, state);
         });
         if (server.start()) {
             int sig = Wt::WServer::waitForShutdown();

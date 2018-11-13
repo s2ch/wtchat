@@ -24,12 +24,13 @@ private:
     State& m_state;
     Wt::WString m_name;
     std::list<uint64_t> m_timestamps;
+    const Wt::WEnvironment& m_env;
     unsigned int ratelimit();
     void sendMessage();
     void updateName();
     void loadLines();
 public:
-    ChatApp(const Wt::WEnvironment& env, Wt::WServer& srv, State& state);
+    ChatApp(const Wt::WEnvironment& env, State& state);
     ~ChatApp();
 };
 

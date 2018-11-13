@@ -23,8 +23,8 @@
 using namespace Wt;
 using namespace std;
 
-ChatApp::ChatApp(const WEnvironment& env, WServer& srv, State& state) :
-        WApplication(env), m_state(state) {
+ChatApp::ChatApp(const WEnvironment& env, State& state) :
+        WApplication(env), m_state(state), m_env(env) {
     m_state.addApp(sessionId(), this);
     enableUpdates(true);
     useStyleSheet("/css/normalize.css");
