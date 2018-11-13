@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <messages nplurals="2" plural="n != 1">
-	<message id="title">Chatty</message>
+	<message id="title">
+		<plural case="0">Chatty [{1} user]</plural>
+		<plural case="1">Chatty [{1} users]</plural>
+	</message>
 	<message id="anonymous">Anon</message>
 	<message id="send">Send</message>
 	<message id="msg_too_long">

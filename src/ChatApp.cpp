@@ -34,13 +34,12 @@ ChatApp::ChatApp(const WEnvironment& env, State& state) :
     auto theme = make_shared<WBootstrapTheme>();
     theme->setVersion(BootstrapVersion::v3);
     setTheme(theme);
-    setTitle(WString::tr("title"));
     auto cont = root()->addNew<WContainerWidget>();
     root()->setStyleClass("container");
     cont->setHeight("100%");
     root()->setHeight("100%");
     auto layout = cont->setLayout(make_unique<Wt::WVBoxLayout>());
-    layout->addWidget(make_unique<WLabel>(WString::tr("title")));
+    m_title = layout->addWidget(make_unique<WLabel>());
     cont->setContentAlignment(AlignmentFlag::Center);
     m_ta_chat = layout->addWidget(make_unique<ChatWidget>(), 1);
     m_ta_chat->setWidth("100%");
@@ -71,6 +70,7 @@ ChatApp::ChatApp(const WEnvironment& env, State& state) :
         b_send->clicked().emit(Wt::WMouseEvent());
     });
     b_send->clicked().connect(this, &ChatApp::sendMessage);
+    updateTitle();
 }
 
 void ChatApp::sendMessage() {
@@ -104,6 +104,17 @@ void ChatApp::sendMessage() {
     m_state.broadcast(sessionId(), [&, msg](ChatApp* target) {
         target->m_ta_chat->addLine(msg);
         target->triggerUpdate();
+    });
+}
+
+void ChatApp::updateTitle() {
+    auto users_cnt = m_state.getUsersCount();
+    auto title = WString::trn("title", users_cnt).arg(users_cnt);
+    setTitle(title);
+    m_title->setText(title);
+    triggerUpdate();
+    m_env.server()->schedule(60s, sessionId(), [=] {
+        updateTitle();
     });
 }
 

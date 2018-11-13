@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <messages nplurals="3"
 	plural="n==1 ? 0 : n%10&gt;=2 &amp;&amp; n%10&lt;=4 &amp;&amp; (n%100&lt;10 || n%100&gt;=20) ? 1 : 2">
-	<message id="title">Чяти</message>
+	<message id="title">
+		<plural case="0">Чяти [{1} юзер]</plural>
+		<plural case="1">Чяти [{1} юзера]</plural>
+		<plural case="2">Чяти [{1} юзеров]</plural>
+	</message>
 	<message id="anonymous">Аноним</message>
 	<message id="send">Послать</message>
 	<message id="msg_too_long">

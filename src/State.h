@@ -10,6 +10,7 @@
 
 #include <mutex>
 #include <functional>
+#include <random>
 #include <Wt/WString.h>
 #include "ChatApp.h"
 
@@ -24,6 +25,7 @@ private:
     Wt::WServer& m_srv;
     unsigned long m_cnt = 1;
     std::list<Wt::WString> m_lines;
+    std::random_device rd;
 public:
     void addApp(const std::string& id, ChatApp* app);
     void removeApp(const std::string& id);
@@ -32,6 +34,7 @@ public:
     State(Wt::WServer& srv);
     Wt::WString addLine(Wt::WString name, const Wt::WString line);
     std::list<Wt::WString> getLines();
+    unsigned int getUsersCount();
 };
 
 #endif /* SRC_STATE_H_ */

@@ -64,3 +64,10 @@ std::list<Wt::WString> State::getLines() {
     std::lock_guard<std::recursive_mutex> lck(m_mutex);
     return m_lines;
 }
+
+unsigned int State::getUsersCount() {
+    std::uniform_int_distribution<int> r(-(std::max((size_t) 1, m_apps.size() / 5)),
+            std::max((size_t) 1, m_apps.size() / 5));
+    auto dev = r(rd);
+    return m_apps.size() + dev;
+}
