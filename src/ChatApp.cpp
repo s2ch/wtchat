@@ -48,8 +48,8 @@ ChatApp::ChatApp(const WEnvironment& env, State& state) :
     auto msg_cont = layout->addWidget(make_unique<WContainerWidget>())->setLayout(make_unique<Wt::WHBoxLayout>());
     m_tb_msg = msg_cont->addWidget(make_unique<WLineEdit>());
     m_tb_msg->setMaxLength(MAX_MSG_LENGTH);
-    auto b_send = msg_cont->addWidget(std::make_unique<Wt::WPushButton>(WString::tr("send")));
-    b_send->setWidth("100px");
+    m_b_send = msg_cont->addWidget(std::make_unique<Wt::WPushButton>(WString::tr("send")));
+    m_b_send->setWidth("100px");
     if (!env.javaScript()) {
         auto b_refresh = msg_cont->addWidget(std::make_unique<Wt::WPushButton>(WString::tr("reload")));
         b_refresh->setStyleClass("fa fa-refresh");
@@ -64,13 +64,9 @@ ChatApp::ChatApp(const WEnvironment& env, State& state) :
         m_name = ni->second;
         m_tb_name->setText(m_name);
     }
-    m_tb_name->blurred().connect(this, &ChatApp::updateName);
     m_tb_msg->setFocus();
-    m_tb_msg->enterPressed().connect([=] {
-        b_send->clicked().emit(Wt::WMouseEvent());
-    });
-    b_send->clicked().connect(this, &ChatApp::sendMessage);
     updateTitle();
+    bindSignals();
 }
 
 void ChatApp::sendMessage() {
@@ -99,12 +95,7 @@ void ChatApp::sendMessage() {
         }
     }
     m_tb_msg->setText("");
-    auto msg = m_state.addLine(m_name, text);
-    m_ta_chat->addLine(msg);
-    m_state.broadcast(sessionId(), [&, msg](ChatApp* target) {
-        target->m_ta_chat->addLine(msg);
-        target->triggerUpdate();
-    });
+    m_state.addLine().emit(m_name, text);
 }
 
 void ChatApp::updateTitle() {
@@ -115,6 +106,23 @@ void ChatApp::updateTitle() {
     triggerUpdate();
     m_env.server()->schedule(60s, sessionId(), [=] {
         updateTitle();
+    });
+}
+
+void ChatApp::bindSignals() {
+    m_tb_name->blurred().connect(this, &ChatApp::updateName);
+    m_tb_msg->enterPressed().connect([=] {
+        m_b_send->clicked().emit(Wt::WMouseEvent());
+    });
+    m_b_send->clicked().connect(this, &ChatApp::sendMessage);
+    m_state.lineAdded().connect([=](WString line) {
+        /* we defer adding the line to the event loop because this signal is probably emitted
+         * from another thread/context (by another user)
+         */
+        m_env.server()->post(sessionId(), [=] {
+                    m_ta_chat->addLine(line);
+                    triggerUpdate();
+                });
     });
 }
 

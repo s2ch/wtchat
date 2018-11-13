@@ -18,7 +18,7 @@ class ChatApp;
 
 using AppMap = std::unordered_map<std::string, ChatApp*>;
 
-class State {
+class State: public Wt::WObject {
 private:
     AppMap m_apps;
     std::recursive_mutex m_mutex;
@@ -26,15 +26,18 @@ private:
     unsigned long m_cnt = 1;
     std::list<Wt::WString> m_lines;
     std::random_device rd;
+    Wt::Signal<Wt::WString> m_line_signal;
+    Wt::Signal<Wt::WString, const Wt::WString> m_add_line_signal;
+    void doAddLine(Wt::WString name, const Wt::WString line);
 public:
     void addApp(const std::string& id, ChatApp* app);
     void removeApp(const std::string& id);
-    void broadcast(const std::string& skipId, std::function<void(ChatApp* app)> f);
     std::string getPostNumber();
     State(Wt::WServer& srv);
-    Wt::WString addLine(Wt::WString name, const Wt::WString line);
     std::list<Wt::WString> getLines();
     unsigned int getUsersCount();
+    Wt::Signal<Wt::WString>& lineAdded();
+    Wt::Signal<Wt::WString, const Wt::WString>& addLine();
 };
 
 #endif /* SRC_STATE_H_ */

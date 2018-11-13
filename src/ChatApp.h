@@ -26,11 +26,13 @@ private:
     std::list<uint64_t> m_timestamps;
     const Wt::WEnvironment& m_env;
     Wt::WLabel* m_title;
+    Wt::WPushButton* m_b_send;
     unsigned int ratelimit();
     void sendMessage();
     void updateName();
     void loadLines();
     void updateTitle();
+    void bindSignals();
 public:
     ChatApp(const Wt::WEnvironment& env, State& state);
     ~ChatApp();
