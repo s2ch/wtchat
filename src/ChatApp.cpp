@@ -27,6 +27,7 @@ ChatApp::ChatApp(const WEnvironment& env, WServer& srv, State& state) :
         WApplication(env), m_state(state) {
     m_state.addApp(sessionId(), this);
     enableUpdates(true);
+    useStyleSheet("/css/normalize.css");
     useStyleSheet("/css/style.css");
     useStyleSheet("/resources/font-awesome/css/font-awesome.min.css");
     messageResourceBundle().use("templates/messages");
