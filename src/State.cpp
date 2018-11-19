@@ -40,14 +40,14 @@ void State::doAddLine(Wt::WString name, const Wt::WString line) {
     }
     auto result = Wt::WString("<span class='{1}'>&lt;{2}&gt;</span> {3}").arg(anon ? "num" : "name").arg(
             Wt::WWebWidget::escapeText(name, true)).arg(Wt::WWebWidget::escapeText(line));
-    m_lines.push_back(result);
+    m_lines.push_back( { anon, name, line, result });
     if (m_lines.size() > MAX_LINES) {
         m_lines.pop_front();
     }
-    m_line_signal.emit(result);
+    m_line_signal.emit(m_lines.back());
 }
 
-std::list<Wt::WString> State::getLines() {
+std::list<Message> State::getLines() {
     std::lock_guard<std::recursive_mutex> lck(m_mutex);
     return m_lines;
 }
@@ -59,7 +59,7 @@ unsigned int State::getUsersCount() {
     return m_apps.size() + dev;
 }
 
-Wt::Signal<Wt::WString>& State::lineAdded() {
+Wt::Signal<Message>& State::lineAdded() {
     return m_line_signal;
 }
 

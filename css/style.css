@@ -17,3 +17,8 @@ html, body {
 .name {
 	color: #996600;
 }
+
+.clickable:hover {
+	text-decoration: underline;
+	cursor: pointer;
+}

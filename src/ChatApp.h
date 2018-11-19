@@ -15,6 +15,7 @@
 #include "ChatWidget.h"
 
 class State;
+class ChatWidget;
 
 class ChatApp: public Wt::WApplication {
 private:

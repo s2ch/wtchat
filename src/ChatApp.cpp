@@ -115,7 +115,7 @@ void ChatApp::bindSignals() {
         m_b_send->clicked().emit(Wt::WMouseEvent());
     });
     m_b_send->clicked().connect(this, &ChatApp::sendMessage);
-    m_state.lineAdded().connect([=](WString line) {
+    m_state.lineAdded().connect([=](Message line) {
         /* we defer adding the line to the event loop because this signal is probably emitted
          * from another thread/context (by another user)
          */
@@ -123,6 +123,10 @@ void ChatApp::bindSignals() {
                     m_ta_chat->addLine(line);
                     triggerUpdate();
                 });
+    });
+    m_ta_chat->nameClicked().connect([=](Message msg) {
+        m_tb_msg->setText(">>" + msg.name + " " + m_tb_msg->text());
+        m_tb_msg->setFocus();
     });
 }
 

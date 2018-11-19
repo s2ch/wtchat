@@ -29,6 +29,7 @@ src = [
   'src/ChatApp.cpp',
   'src/ChatWidget.cpp',
   'src/State.cpp',
+  'src/ChatLine.cpp',
   'src/utils.cpp'
 ]
 
